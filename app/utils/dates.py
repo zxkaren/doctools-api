@@ -3,7 +3,10 @@ from zoneinfo import ZoneInfo
 
 
 def get_current_datetime(timezone_name: str) -> datetime:
-    return datetime.now(ZoneInfo(timezone_name))
+    try:
+        return datetime.now(ZoneInfo(timezone_name))
+    except Exception:
+        return datetime.now()
 
 
 def get_filename_timestamp(timezone_name: str) -> str:
