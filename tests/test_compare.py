@@ -4,6 +4,7 @@ from pathlib import Path
 
 import fitz
 import pytest
+from docx import Document
 
 os.environ.setdefault("FLASK_ENV", "testing")
 os.environ.setdefault("DEBUG", "False")
@@ -18,7 +19,7 @@ os.environ.setdefault("COMPARE_RECEIVED_FOLDER", "received")
 os.environ.setdefault("COMPARE_PROCESSED_FOLDER", "processed")
 os.environ.setdefault("COMPARE_TEMP_FOLDER", "temp")
 os.environ.setdefault("ALLOWED_COMPARE_EXTENSIONS", "pdf,doc,docx,xlsx,ppt,pptx")
-os.environ.setdefault("IMPLEMENTED_COMPARE_EXTENSIONS", "pdf")
+os.environ.setdefault("IMPLEMENTED_COMPARE_EXTENSIONS", "pdf,docx")
 os.environ.setdefault("DEFAULT_COMPARE_RESPONSE_MODE", "json_file")
 os.environ.setdefault("ALLOWED_COMPARE_RESPONSE_MODES", "download_url,json,json_file")
 os.environ.setdefault("CLEANUP_FILE_MAX_AGE_HOURS", "24")
@@ -59,6 +60,16 @@ def build_pdf_bytes(text: str) -> bytes:
     document.close()
 
     return pdf_bytes
+
+
+def build_docx_bytes(text: str) -> bytes:
+    document = Document()
+    document.add_paragraph(text)
+
+    document_bytes = BytesIO()
+    document.save(document_bytes)
+
+    return document_bytes.getvalue()
 
 
 def test_compare_pdf_returns_download_url_and_summary_table(client) -> None:
