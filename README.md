@@ -8,27 +8,37 @@ Projeto criado por **zxkaren**.
 
 Neste momento, a API possui a funcionalidade:
 
-- Compare: comparação de documentos PDF
+* Compare: comparação de documentos PDF, Word e Excel.
 
-A estrutura já está preparada para futuras comparações de:
+Extensões implementadas:
 
-- DOC
-- DOCX
-- XLSX
-- PPT
-- PPTX
+* PDF
+* DOCX
+* XLSX
 
-Esses motores serão implementados nas próximas etapas.
+A estrutura está preparada para futura comparação de:
+
+* PPTX
+
+Arquivos binários legados não serão tratados nesta API:
+
+* DOC
+* XLS
+* PPT
+
+Esses formatos pertencem a padrões antigos/binários e ficam fora do escopo do projeto.
 
 ## Tecnologias utilizadas
 
-- Python
-- Flask
-- Flasgger
-- PyMuPDF
-- APScheduler
-- python-decouple
-- pytest
+* Python
+* Flask
+* Flasgger
+* PyMuPDF
+* python-docx
+* openpyxl
+* APScheduler
+* python-decouple
+* pytest
 
 ## Estrutura do projeto
 
@@ -57,9 +67,9 @@ doctools-api/
 │   │       │
 │   │       └── processors/
 │   │           ├── __init__.py
+│   │           ├── pdf_processor.py
 │   │           ├── word_processor.py
 │   │           ├── excel_processor.py
-│   │           ├── pdf_processor.py
 │   │           └── slides_processor.py
 │   │
 │   ├── jobs/
@@ -81,11 +91,18 @@ doctools-api/
 │       └── temp/
 │           └── .gitkeep
 │
+├── tests/
+│   ├── __init__.py
+│   ├── test_cleanup_files.py
+│   └── test_compare.py
+│
 ├── .env.example
 ├── .gitignore
+├── CHANGELOG.md
+├── README.md
 ├── requirements.txt
 ├── run.py
-└── README.md
+└── VERSION
 ```
 
 ## Como instalar
@@ -109,6 +126,12 @@ Ative o ambiente virtual:
 source .venv/bin/activate
 ```
 
+No Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
 Instale as dependências:
 
 ```bash
@@ -119,6 +142,12 @@ Crie o arquivo `.env` com base no exemplo:
 
 ```bash
 cp .env.example .env
+```
+
+No Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
 ```
 
 Ajuste os valores do `.env` conforme seu ambiente local.
@@ -182,14 +211,38 @@ Extensões aceitas:
 
 ```text
 pdf
-doc
 docx
 xlsx
-ppt
 pptx
 ```
 
-Neste momento, apenas `pdf` está implementado.
+Extensões implementadas neste momento:
+
+```text
+pdf
+docx
+xlsx
+```
+
+Extensão planejada para próxima implementação:
+
+```text
+pptx
+```
+
+## Modos de resposta
+
+### download_url
+
+Retorna apenas o link para download do arquivo processado.
+
+### json
+
+Retorna apenas a tabela de resumo da comparação.
+
+### json_file
+
+Retorna o link para download do arquivo processado e a tabela de resumo da comparação.
 
 ## Exemplo de resposta
 
@@ -198,7 +251,7 @@ Neste momento, apenas `pdf` está implementado.
   "success": true,
   "message": "comparação concluída",
   "data": {
-    "download_url": "/compare/download/arquivo-compared-07062026-153000.pdf",
+    "download_url": "/compare/download/arquivo-compared-28062026-153000.xlsx",
     "summary_table": {
       "add": 10,
       "delete": 3,
@@ -212,11 +265,36 @@ Neste momento, apenas `pdf` está implementado.
 
 A comparação de PDF:
 
-- usa o arquivo modificado como base;
-- destaca em azul palavras adicionadas;
-- sublinha em vermelho pontos com exclusões;
-- adiciona comentário lateral com o texto excluído;
-- cria uma página final com a tabela de resumo.
+* usa o arquivo modificado como base;
+* destaca em azul palavras adicionadas;
+* sublinha em vermelho pontos com exclusões;
+* adiciona comentário lateral com o texto excluído;
+* cria uma página final com a tabela de resumo.
+
+## Regras da comparação Word
+
+A comparação de Word:
+
+* aceita arquivos no formato `.docx`;
+* usa o arquivo modificado como base;
+* preserva o máximo possível da formatação do arquivo modificado;
+* destaca em azul e sublinhado conteúdos adicionados;
+* destaca em vermelho e tachado conteúdos removidos;
+* cria uma página final com a tabela de resumo.
+
+## Regras da comparação Excel
+
+A comparação de Excel:
+
+* aceita arquivos no formato `.xlsx`;
+* usa o arquivo modificado como base;
+* preserva a formatação do arquivo modificado;
+* destaca células adicionadas com fundo azul claro;
+* destaca células removidas com fundo vermelho claro;
+* adiciona comentários nas células alteradas com os prefixos `add:` e `delete:`;
+* cria uma aba `summary_table` com a tabela de resumo.
+
+## Tabela de resumo
 
 A tabela de resumo contém:
 
@@ -250,21 +328,25 @@ A rotina preserva os arquivos `.gitkeep`.
 
 Implementado:
 
-- Estrutura Flask
-- Swagger
-- Configuração via `.env`
-- Upload de arquivos
-- Comparação de PDF
-- Geração de arquivo processado
-- Retorno com `download_url`
-- Retorno com `summary_table`
-- Rotina de limpeza
+* Estrutura Flask
+* Swagger
+* Configuração via `.env`
+* Upload de arquivos
+* Comparação de PDF
+* Comparação de DOCX
+* Comparação de XLSX
+* Geração de arquivo processado
+* Retorno com `download_url`
+* Retorno com `summary_table`
+* Rotina de limpeza
+* Testes automatizados para Compare
 
 Próximas implementações:
 
-- Comparação de DOC
-- Comparação de DOCX
-- Comparação de XLSX
-- Comparação de PPT
-- Comparação de PPTX
-- Testes automatizados
+* Comparação de PPTX
+
+Fora do escopo:
+
+* Comparação de DOC
+* Comparação de XLS
+* Comparação de PPT
