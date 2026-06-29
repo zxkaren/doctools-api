@@ -33,5 +33,6 @@ rpds-py==2026.5.1
 six==1.17.0
 typing_extensions==4.15.0
 tzlocal==5.3.1
+tzdata==2026.2
 Werkzeug==3.1.8
 xlsxwriter==3.2.9

@@ -4,6 +4,25 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
 O formato segue uma estrutura simples baseada em versionamento semântico.
 
+## [1.2.0] - 2026-06-28
+
+### Adicionado
+
+* Funcionalidade Compare para documentos Excel no formato `.xlsx`.
+* Motor de comparação Excel com marcação visual de alterações por célula.
+* Destaque azul claro para células adicionadas.
+* Destaque vermelho claro para células removidas.
+* Comentários em células alteradas com prefixos `add:` e `delete:`.
+* Geração de aba `summary_table` com total de adições, exclusões e alterações.
+* Suporte ao download do arquivo Excel processado.
+* Testes automatizados para comparação de documentos Excel.
+
+### Alterado
+
+* Fluxo da funcionalidade Compare atualizado para rotear arquivos `.xlsx`.
+* Arquivo `.env.example` atualizado para indicar suporte implementado a `xlsx`.
+* Testes da funcionalidade Compare atualizados para contemplar arquivos Excel.
+
 ## [1.1.0] - 2026-06-28
 
 ### Adicionado
