@@ -85,10 +85,8 @@ def compare_by_selected_extension(route_extension: str):
         required: true
         enum:
           - pdf
-          - doc
           - docx
           - xlsx
-          - ppt
           - pptx
         description: Extensão escolhida
       - name: original

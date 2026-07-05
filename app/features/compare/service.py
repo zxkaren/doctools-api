@@ -9,9 +9,18 @@ from app.config import Config
 from app.core.exceptions import FeatureNotImplementedError
 from app.core.file_manager import save_uploaded_file
 from app.core.responses import build_compare_payload
-from app.features.compare.processors.pdf_processor import compare_files as compare_pdf_files
-from app.features.compare.processors.word_processor import compare_files as compare_docx_files
-from app.features.compare.processors.excel_processor import compare_files as compare_xlsx_files
+from app.features.compare.processors.excel_processor import (
+    compare_files as compare_xlsx_files,
+)
+from app.features.compare.processors.pdf_processor import (
+    compare_files as compare_pdf_files,
+)
+from app.features.compare.processors.slides_processor import (
+    compare_files as compare_pptx_files,
+)
+from app.features.compare.processors.word_processor import (
+    compare_files as compare_docx_files,
+)
 from app.features.compare.validators import validate_compare_request
 from app.utils.dates import get_filename_timestamp
 from app.utils.filenames import build_processed_filename, build_received_filename
@@ -39,8 +48,12 @@ def get_compare_processor(file_extension: str) -> CompareProcessor:
     if file_extension == "xlsx":
         return compare_xlsx_files
 
+    if file_extension == "pptx":
+        return compare_pptx_files
+
     raise FeatureNotImplementedError(
-        "o servidor reconhece a requisição, mas não possui a funcionalidade necessária para atendê-la"
+        "o servidor reconhece a requisição, mas não possui a funcionalidade "
+        "necessária para atendê-la"
     )
 
 
@@ -133,6 +146,7 @@ def process_compare_request(
     processed_path = Config.COMPARE_PROCESSED_FOLDER / processed_filename
 
     compare_processor = get_compare_processor(file_extension)
+
     processor_result = compare_processor(
         original_path,
         modified_path,
