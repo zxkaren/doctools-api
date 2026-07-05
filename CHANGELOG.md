@@ -4,6 +4,23 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
 O formato segue uma estrutura simples baseada em versionamento semântico.
 
+## [1.3.0] - 2026-07-05
+
+### Added
+- Implementado suporte à comparação de arquivos PowerPoint no formato `.pptx`.
+- Adicionada geração de anotações por slide com alterações identificadas em textos, imagens e slides.
+- Adicionada tabela de resumo final para comparações PPTX com `add`, `delete` e `total_changes`.
+- Adicionado teste automatizado para comparação de arquivos PPTX.
+
+### Changed
+- Atualizada documentação do Compare para incluir suporte a PowerPoint.
+- Atualizado Swagger para listar `.pptx` como extensão implementada.
+- Atualizada configuração de extensões implementadas para incluir `.pptx`.
+
+### Notes
+- Arquivos `.ppt` continuam fora do escopo por serem formato binário legado.
+- A comparação PPTX preserva visualmente os slides existentes e registra diferenças no campo de anotações.
+
 ## [1.2.0] - 2026-06-28
 
 ### Adicionado

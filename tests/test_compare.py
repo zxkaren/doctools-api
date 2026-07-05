@@ -4,27 +4,34 @@ from pathlib import Path
 
 import fitz
 import pytest
-from docx import Document
 from openpyxl import Workbook, load_workbook
+from pptx import Presentation
+from pptx.util import Inches
 
-os.environ.setdefault("FLASK_ENV", "testing")
-os.environ.setdefault("DEBUG", "False")
-os.environ.setdefault("HOST", "127.0.0.1")
-os.environ.setdefault("PORT", "5000")
-os.environ.setdefault("TIMEZONE_NAME", "America/Sao_Paulo")
-os.environ.setdefault("SECRET_KEY", "test-secret-key")
-os.environ.setdefault("MAX_CONTENT_LENGTH", "52428800")
-os.environ.setdefault("STORAGE_ROOT", "storage")
-os.environ.setdefault("COMPARE_STORAGE_FOLDER", "compare")
-os.environ.setdefault("COMPARE_RECEIVED_FOLDER", "received")
-os.environ.setdefault("COMPARE_PROCESSED_FOLDER", "processed")
-os.environ.setdefault("COMPARE_TEMP_FOLDER", "temp")
-os.environ.setdefault("ALLOWED_COMPARE_EXTENSIONS", "pdf,docx,xlsx,pptx")
-os.environ.setdefault("IMPLEMENTED_COMPARE_EXTENSIONS", "pdf,docx,xlsx")
-os.environ.setdefault("DEFAULT_COMPARE_RESPONSE_MODE", "json_file")
-os.environ.setdefault("ALLOWED_COMPARE_RESPONSE_MODES", "download_url,json,json_file")
-os.environ.setdefault("CLEANUP_FILE_MAX_AGE_HOURS", "24")
-os.environ.setdefault("CLEANUP_INTERVAL_MINUTES", "60")
+
+os.environ["FLASK_ENV"] = "testing"
+os.environ["DEBUG"] = "False"
+os.environ["HOST"] = "127.0.0.1"
+os.environ["PORT"] = "5000"
+os.environ["TIMEZONE_NAME"] = "America/Sao_Paulo"
+os.environ["SECRET_KEY"] = "test-secret-key"
+os.environ["MAX_CONTENT_LENGTH"] = "52428800"
+
+os.environ["STORAGE_ROOT"] = "storage"
+os.environ["COMPARE_STORAGE_FOLDER"] = "compare"
+os.environ["COMPARE_RECEIVED_FOLDER"] = "received"
+os.environ["COMPARE_PROCESSED_FOLDER"] = "processed"
+os.environ["COMPARE_TEMP_FOLDER"] = "temp"
+
+os.environ["ALLOWED_COMPARE_EXTENSIONS"] = "pdf,docx,xlsx,pptx"
+os.environ["IMPLEMENTED_COMPARE_EXTENSIONS"] = "pdf,docx,xlsx,pptx"
+
+os.environ["DEFAULT_COMPARE_RESPONSE_MODE"] = "json_file"
+os.environ["ALLOWED_COMPARE_RESPONSE_MODES"] = "download_url,json,json_file"
+
+os.environ["CLEANUP_FILE_MAX_AGE_HOURS"] = "24"
+os.environ["CLEANUP_INTERVAL_MINUTES"] = "60"
+
 
 from app import create_app
 from app.config import Config
@@ -35,6 +42,9 @@ def client(tmp_path: Path):
     Config.COMPARE_RECEIVED_FOLDER = tmp_path / "storage" / "compare" / "received"
     Config.COMPARE_PROCESSED_FOLDER = tmp_path / "storage" / "compare" / "processed"
     Config.COMPARE_TEMP_FOLDER = tmp_path / "storage" / "compare" / "temp"
+
+    Config.ALLOWED_COMPARE_EXTENSIONS = ["pdf", "docx", "xlsx", "pptx"]
+    Config.IMPLEMENTED_COMPARE_EXTENSIONS = ["pdf", "docx", "xlsx", "pptx"]
 
     flask_app = create_app()
     flask_app.config["TESTING"] = True
@@ -63,16 +73,10 @@ def build_pdf_bytes(text: str) -> bytes:
     return pdf_bytes
 
 
-def build_docx_bytes(text: str) -> bytes:
-    document = Document()
-    document.add_paragraph(text)
-
-    document_bytes = BytesIO()
-    document.save(document_bytes)
-
-    return document_bytes.getvalue()
-
-def build_xlsx_bytes(cell_values: dict[str, object], sheet_name: str = "Sheet1") -> bytes:
+def build_xlsx_bytes(
+    cell_values: dict[str, object],
+    sheet_name: str = "Sheet1",
+) -> bytes:
     workbook = Workbook()
     worksheet = workbook.active
     worksheet.title = sheet_name
@@ -84,6 +88,66 @@ def build_xlsx_bytes(cell_values: dict[str, object], sheet_name: str = "Sheet1")
     workbook.save(workbook_bytes)
 
     return workbook_bytes.getvalue()
+
+
+def add_pptx_text_slide(
+    presentation: Presentation,
+    text: str,
+) -> None:
+    slide = presentation.slides.add_slide(presentation.slide_layouts[6])
+
+    text_box = slide.shapes.add_textbox(
+        Inches(1),
+        Inches(1),
+        Inches(6),
+        Inches(1),
+    )
+    text_box.text_frame.text = text
+
+
+def build_pptx_bytes(
+    first_slide_text: str,
+    second_slide_text: str | None = None,
+) -> bytes:
+    presentation = Presentation()
+
+    add_pptx_text_slide(
+        presentation,
+        first_slide_text,
+    )
+
+    if second_slide_text:
+        add_pptx_text_slide(
+            presentation,
+            second_slide_text,
+        )
+
+    presentation_bytes = BytesIO()
+    presentation.save(presentation_bytes)
+
+    return presentation_bytes.getvalue()
+
+
+def get_slide_text(slide) -> str:
+    text_values = []
+
+    for shape in slide.shapes:
+        if getattr(shape, "has_text_frame", False):
+            text_values.append(shape.text_frame.text)
+
+    return "\n".join(text_values)
+
+
+def get_slide_notes(slide) -> str:
+    return slide.notes_slide.notes_text_frame.text or ""
+
+
+def get_presentation_notes(presentation: Presentation) -> str:
+    return "\n".join(
+        get_slide_notes(slide)
+        for slide in presentation.slides
+    )
+
 
 def test_compare_pdf_returns_download_url_and_summary_table(client) -> None:
     original_pdf = build_pdf_bytes("hello world")
@@ -168,6 +232,7 @@ def test_compare_specific_route_with_wrong_extension_returns_bad_request(client)
     assert response_payload["success"] is False
     assert response_payload["error"]["message"] == "essa rota só aceita a extensão selecionada"
 
+
 def test_compare_xlsx_returns_download_url_summary_and_processed_file(client) -> None:
     original_xlsx = build_xlsx_bytes(
         {
@@ -179,7 +244,6 @@ def test_compare_xlsx_returns_download_url_summary_and_processed_file(client) ->
             "C1": "Remove me",
         }
     )
-
     modified_xlsx = build_xlsx_bytes(
         {
             "A1": "Item",
@@ -225,11 +289,61 @@ def test_compare_xlsx_returns_download_url_summary_and_processed_file(client) ->
     assert compared_workbook["summary_table"]["A1"].value == "add"
     assert compared_workbook["summary_table"]["A2"].value == "delete"
     assert compared_workbook["summary_table"]["A3"].value == "total_changes"
-
     assert compared_worksheet["B5"].fill.fgColor.rgb.endswith("ADD8E6")
     assert compared_worksheet["B5"].comment is not None
     assert compared_worksheet["B5"].comment.text.startswith("add:")
-
     assert compared_worksheet["C1"].fill.fgColor.rgb.endswith("FF9393")
     assert compared_worksheet["C1"].comment is not None
     assert compared_worksheet["C1"].comment.text.startswith("delete:")
+
+
+def test_compare_pptx_returns_download_url_summary_and_processed_file(client) -> None:
+    original_pptx = build_pptx_bytes(
+        first_slide_text="hello legacy world",
+    )
+    modified_pptx = build_pptx_bytes(
+        first_slide_text="hello brave world",
+        second_slide_text="new slide",
+    )
+
+    response = client.post(
+        "/compare/",
+        data={
+            "original": (BytesIO(original_pptx), "original.pptx"),
+            "modified": (BytesIO(modified_pptx), "modified.pptx"),
+            "response_mode": "json_file",
+        },
+        content_type="multipart/form-data",
+    )
+
+    response_payload = response.get_json()
+
+    assert response.status_code == 200
+    assert response_payload["success"] is True
+    assert "download_url" in response_payload["data"]
+    assert "summary_table" in response_payload["data"]
+
+    summary_table = response_payload["data"]["summary_table"]
+
+    assert summary_table["add"] >= 2
+    assert summary_table["delete"] >= 1
+    assert summary_table["total_changes"] == summary_table["add"] + summary_table["delete"]
+
+    processed_files = list(Config.COMPARE_PROCESSED_FOLDER.glob("*compared*.pptx"))
+
+    assert len(processed_files) == 1
+
+    compared_presentation = Presentation(processed_files[0])
+    first_slide_text = get_slide_text(compared_presentation.slides[0])
+    all_notes = get_presentation_notes(compared_presentation)
+    last_slide_text = get_slide_text(compared_presentation.slides[-1])
+
+    assert "hello brave world" in first_slide_text
+    assert "hello legacy world" not in first_slide_text
+
+    assert "DocTools Compare" in all_notes
+    assert "delete: legacy" in all_notes
+    assert "add: brave" in all_notes
+    assert "add: slide adicionado" in all_notes
+
+    assert "summary table" in last_slide_text

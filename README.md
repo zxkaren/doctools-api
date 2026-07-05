@@ -15,9 +15,6 @@ Extensões implementadas:
 * PDF
 * DOCX
 * XLSX
-
-A estrutura está preparada para futura comparação de:
-
 * PPTX
 
 Arquivos binários legados não serão tratados nesta API:
@@ -222,11 +219,6 @@ Extensões implementadas neste momento:
 pdf
 docx
 xlsx
-```
-
-Extensão planejada para próxima implementação:
-
-```text
 pptx
 ```
 
@@ -293,6 +285,24 @@ A comparação de Excel:
 * destaca células removidas com fundo vermelho claro;
 * adiciona comentários nas células alteradas com os prefixos `add:` e `delete:`;
 * cria uma aba `summary_table` com a tabela de resumo.
+
+## Regras da comparação PowerPoint
+
+A comparação de PowerPoint:
+
+* aceita arquivos no formato `.pptx`;
+* usa o arquivo modificado como base;
+* preserva visualmente os slides existentes;
+* não altera textos, imagens, fontes, caixas, posições ou layout dos slides originais/modificados;
+* compara os slides por similaridade de conteúdo, não apenas pela posição;
+* registra as alterações identificadas no campo de anotações do respectivo slide;
+* registra alterações textuais no formato `add: conteúdo incluído` e `delete: conteúdo removido`;
+* registra imagens adicionadas como `add: imagem adicionada`;
+* registra imagens removidas como `delete: imagem removida`;
+* registra slides adicionados nas anotações do próprio slide adicionado;
+* registra slides removidos nas anotações do slide final de resumo;
+* contabiliza alterações por evento identificado, não por quantidade de palavras;
+* cria um slide final com a tabela de resumo.
 
 ## Tabela de resumo
 
