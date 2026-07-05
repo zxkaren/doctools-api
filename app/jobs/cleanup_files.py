@@ -26,13 +26,6 @@ def cleanup_storage_folder(folder_path: Path, expiration_limit: datetime) -> int
     """
     Resumo:
         Remove arquivos expirados de uma pasta de armazenamento sem apagar .gitkeep.
-
-    Parâmetros:
-        folder_path (Path): pasta que será analisada.
-        expiration_limit (datetime): data limite para considerar um arquivo expirado.
-
-    Retorno:
-        int: quantidade de arquivos removidos.
     """
     removed_files_count = 0
 
@@ -50,6 +43,15 @@ def cleanup_storage_folder(folder_path: Path, expiration_limit: datetime) -> int
 
     return removed_files_count
 
+def get_cleanup_storage_folders() -> list[Path]:
+    return [
+        Config.COMPARE_RECEIVED_FOLDER,
+        Config.COMPARE_PROCESSED_FOLDER,
+        Config.COMPARE_TEMP_FOLDER,
+        Config.EXTRACT_TEXT_RECEIVED_FOLDER,
+        Config.EXTRACT_TEXT_PROCESSED_FOLDER,
+        Config.EXTRACT_TEXT_TEMP_FOLDER,
+    ]
 
 def cleanup_compare_files() -> int:
     expiration_limit = get_file_expiration_limit(
@@ -57,15 +59,9 @@ def cleanup_compare_files() -> int:
         Config.CLEANUP_FILE_MAX_AGE_HOURS,
     )
 
-    storage_folders = [
-        Config.COMPARE_RECEIVED_FOLDER,
-        Config.COMPARE_PROCESSED_FOLDER,
-        Config.COMPARE_TEMP_FOLDER,
-    ]
-
     removed_files_count = 0
 
-    for folder_path in storage_folders:
+    for folder_path in get_cleanup_storage_folders():
         removed_files_count += cleanup_storage_folder(folder_path, expiration_limit)
 
     logging.info(f"limpeza concluída. arquivos removidos: {removed_files_count}")

@@ -4,6 +4,22 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
 O formato segue uma estrutura simples baseada em versionamento semântico.
 
+## [1.4.0] - 2026-07-05
+
+### Added
+- Added text extraction feature through the new `/extract-text/` endpoint.
+- Added support for extracting clean text from PDF, DOCX and PPTX files.
+- Added support for individual output generation following the rule: one input file generates one output file.
+- Added output formats for extracted text: DOCX, TXT and JSON.
+- Added text cleaning rules to remove URLs, emails, emojis, page numbers and image captions.
+- Added recursive extraction for nested DOCX tables and grouped PPTX shapes.
+- Added automated tests for text extraction, default output format, invalid extensions, invalid output formats and text cleaning rules.
+
+### Changed
+- Updated Swagger configuration to include the new text extraction feature.
+- Updated Swagger version loading to read the project version from the `VERSION` file.
+- Updated cleanup routine to include `storage/extract_text` folders.
+
 ## [1.3.0] - 2026-07-05
 
 ### Added

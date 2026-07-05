@@ -1,29 +1,41 @@
 # DocTools API
 
-API desenvolvida em Python com Flask e Swagger para entregar ferramentas relacionadas a documentos.
+A DocTools API é uma API desenvolvida em Python com Flask e Swagger para centralizar ferramentas de processamento, análise e tratamento de documentos.
 
-Projeto criado por **zxkaren**.
+O projeto foi estruturado de forma modular para permitir a evolução contínua de novas funcionalidades documentais, mantendo separação clara entre recursos, rotas, processamentos, validações, testes e documentação.
 
 ## Funcionalidades
 
-Neste momento, a API possui a funcionalidade:
+### Compare
 
-* Compare: comparação de documentos PDF, Word e Excel.
+Funcionalidade responsável pela comparação de documentos, permitindo identificar diferenças entre arquivos de uma mesma extensão.
 
-Extensões implementadas:
+Pode ser usada, por exemplo, para comparar contratos, propostas, atas, versões revisadas de documentos ou arquivos técnicos, ajudando a identificar o que foi adicionado, removido ou alterado entre duas versões.
 
-* PDF
-* DOCX
-* XLSX
-* PPTX
+Extensões suportadas:
 
-Arquivos binários legados não serão tratados nesta API:
+- PDF
+- DOCX
+- XLSX
+- PPTX
 
-* DOC
-* XLS
-* PPT
+### Extração de Texto
 
-Esses formatos pertencem a padrões antigos/binários e ficam fora do escopo do projeto.
+Funcionalidade responsável por extrair somente o conteúdo textual de documentos, ignorando elementos que não fazem parte da leitura principal, como imagens, ícones, emojis, URLs, e-mails, números de página e legendas de figuras.
+
+Pode ser usada, por exemplo, para limpar textos de papers, contratos, apresentações, atas, resumos, notas de imprensa e materiais técnicos. Esse conteúdo extraído pode ser reaproveitado para revisão textual, reescrita, análise, indexação ou integração futura com aplicações de leitura em voz alta, como uma `voice-reader-api`, oferecendo uma experiência próxima de audiolivro ou podcast.
+
+Extensões suportadas:
+
+- PDF
+- DOCX
+- PPTX
+
+Formatos de saída:
+
+- DOCX
+- TXT
+- JSON
 
 ## Tecnologias utilizadas
 
@@ -56,7 +68,20 @@ doctools-api/
 │   ├── features/
 │   │   ├── __init__.py
 │   │   │
-│   │   └── compare/
+│   │   ├── compare/
+│   │   │   ├── __init__.py
+│   │   │   ├── routes.py
+│   │   │   ├── service.py
+│   │   │   ├── validators.py
+│   │   │   │
+│   │   │   └── processors/
+│   │   │       ├── __init__.py
+│   │   │       ├── pdf_processor.py
+│   │   │       ├── word_processor.py
+│   │   │       ├── excel_processor.py
+│   │   │       └── slides_processor.py
+│   │   │
+│   │   └── extract_text/
 │   │       ├── __init__.py
 │   │       ├── routes.py
 │   │       ├── service.py
@@ -66,8 +91,8 @@ doctools-api/
 │   │           ├── __init__.py
 │   │           ├── pdf_processor.py
 │   │           ├── word_processor.py
-│   │           ├── excel_processor.py
-│   │           └── slides_processor.py
+│   │           ├── slides_processor.py
+│   │           └── text_cleaner.py
 │   │
 │   ├── jobs/
 │   │   ├── __init__.py
@@ -80,7 +105,15 @@ doctools-api/
 │       └── logs.py
 │
 ├── storage/
-│   └── compare/
+│   ├── compare/
+│   │   ├── received/
+│   │   │   └── .gitkeep
+│   │   ├── processed/
+│   │   │   └── .gitkeep
+│   │   └── temp/
+│   │       └── .gitkeep
+│   │
+│   └── extract_text/
 │       ├── received/
 │       │   └── .gitkeep
 │       ├── processed/
@@ -91,7 +124,8 @@ doctools-api/
 ├── tests/
 │   ├── __init__.py
 │   ├── test_cleanup_files.py
-│   └── test_compare.py
+│   ├── test_compare.py
+│   └── test_extract_text.py
 │
 ├── .env.example
 ├── .gitignore
@@ -100,7 +134,6 @@ doctools-api/
 ├── requirements.txt
 ├── run.py
 └── VERSION
-```
 
 ## Como instalar
 
@@ -171,6 +204,14 @@ http://127.0.0.1:5000/docs/
 
 ## Rotas disponíveis
 
+A DocTools API organiza suas rotas por funcionalidade. Cada grupo de rota pertence a uma feature específica do projeto.
+
+---
+
+## Compare
+
+Funcionalidade responsável por comparar documentos de uma mesma extensão e identificar diferenças entre eles.
+
 ### Comparar documentos identificando a extensão automaticamente
 
 ```text
@@ -222,36 +263,81 @@ xlsx
 pptx
 ```
 
-## Modos de resposta
+### Baixar arquivo processado pelo Compare
 
-### download_url
-
-Retorna apenas o link para download do arquivo processado.
-
-### json
-
-Retorna apenas a tabela de resumo da comparação.
-
-### json_file
-
-Retorna o link para download do arquivo processado e a tabela de resumo da comparação.
-
-## Exemplo de resposta
-
-```json
-{
-  "success": true,
-  "message": "comparação concluída",
-  "data": {
-    "download_url": "/compare/download/arquivo-compared-28062026-153000.xlsx",
-    "summary_table": {
-      "add": 10,
-      "delete": 3,
-      "total_changes": 13
-    }
-  }
-}
+```text
+GET /compare/download/{processed_filename}
 ```
+
+Essa rota é usada para baixar arquivos processados quando a resposta da comparação retorna um `download_url`.
+
+---
+
+## Extração de Texto
+
+Funcionalidade responsável por extrair apenas o conteúdo textual principal de documentos, removendo elementos que não fazem parte da leitura útil.
+
+### Extrair texto de documentos
+
+```text
+POST /extract-text/
+```
+
+Campo obrigatório:
+
+```text
+files
+```
+
+O campo `files` aceita um ou mais arquivos na mesma requisição.
+
+Campo opcional:
+
+```text
+output_format
+```
+
+Valores permitidos para `output_format`:
+
+```text
+docx
+txt
+json
+```
+
+Valor padrão:
+
+```text
+docx
+```
+
+Extensões aceitas:
+
+```text
+pdf
+docx
+pptx
+```
+
+Regra de processamento:
+
+```text
+1 arquivo enviado = 1 arquivo de saída gerado
+```
+
+Exemplo:
+
+```text
+3 arquivos enviados = 3 arquivos processados individualmente
+```
+
+### Baixar arquivo processado pela Extração de Texto
+
+```text
+GET /extract-text/download/{processed_filename}
+```
+
+Essa rota é usada para baixar arquivos processados quando a resposta da extração retorna um `download_url`.
 
 ## Regras da comparação PDF
 
@@ -313,6 +399,46 @@ add
 delete
 total_changes
 ```
+## Regras da Extração de Texto
+
+A extração de texto:
+
+* aceita arquivos nos formatos `.pdf`, `.docx` e `.pptx`;
+* processa um ou mais arquivos na mesma requisição;
+* respeita a regra `1 arquivo enviado = 1 arquivo de saída gerado`;
+* permite saída nos formatos `.docx`, `.txt` e `.json`;
+* usa `.docx` como formato padrão quando `output_format` não é informado;
+* extrai apenas o conteúdo textual principal do documento;
+* ignora imagens, ícones, gráficos e objetos visuais;
+* ignora URLs, e-mails, emojis, números de página e legendas de imagens;
+* ignora cabeçalhos, rodapés e notas quando não fazem parte do corpo principal extraído;
+* preserva acentuação, pontuação e quebras úteis para leitura;
+* mantém o processamento dos demais arquivos quando algum arquivo falha;
+* retorna o status individual de cada arquivo processado.
+
+## Formatos de saída
+
+A extração de texto pode gerar arquivos nos formatos:
+
+```text
+docx
+txt
+json
+```
+
+## Estrutura da resposta
+
+A resposta da extração informa:
+
+```text
+output_format
+total_files
+processed_files
+failed_files
+files
+```
+
+Cada item de `files` representa o resultado individual de um arquivo enviado.
 
 ## Segurança
 
@@ -333,30 +459,3 @@ storage/compare/temp/
 ```
 
 A rotina preserva os arquivos `.gitkeep`.
-
-## Status do projeto
-
-Implementado:
-
-* Estrutura Flask
-* Swagger
-* Configuração via `.env`
-* Upload de arquivos
-* Comparação de PDF
-* Comparação de DOCX
-* Comparação de XLSX
-* Geração de arquivo processado
-* Retorno com `download_url`
-* Retorno com `summary_table`
-* Rotina de limpeza
-* Testes automatizados para Compare
-
-Próximas implementações:
-
-* Comparação de PPTX
-
-Fora do escopo:
-
-* Comparação de DOC
-* Comparação de XLS
-* Comparação de PPT
