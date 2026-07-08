@@ -5,6 +5,7 @@ from app.config import Config
 from app.core.exceptions import register_error_handlers
 from app.features.compare import compare_blueprint
 from app.features.extract_text import extract_text_blueprint
+from app.features.split_pdf import split_pdf_blueprint
 
 
 def load_project_version() -> str:
@@ -41,6 +42,10 @@ SWAGGER_TEMPLATE = {
         {
             "name": "Extração de Texto",
             "description": "Funcionalidade para extração de texto limpo de documentos",
+        },
+        {
+            "name": "Split PDF",
+            "description": "Funcionalidade para separar arquivos PDF por páginas individuais ou packs personalizados",
         },
     ],
 }
@@ -80,7 +85,7 @@ def create_app() -> Flask:
 
     flask_app.register_blueprint(compare_blueprint, url_prefix="/compare")
     flask_app.register_blueprint(extract_text_blueprint, url_prefix="/extract-text")
-
+    flask_app.register_blueprint(split_pdf_blueprint, url_prefix="/split/pdf")
     register_error_handlers(flask_app)
 
     return flask_app
