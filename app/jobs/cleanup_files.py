@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -26,11 +25,18 @@ def cleanup_storage_folder(folder_path: Path, expiration_limit: datetime) -> int
     """
     Resumo:
         Remove arquivos expirados de uma pasta de armazenamento sem apagar .gitkeep.
+
+    Parâmetros:
+        folder_path: pasta que será analisada.
+        expiration_limit: data limite para considerar um arquivo expirado.
+
+    Retorno:
+        Quantidade de arquivos removidos.
     """
     removed_files_count = 0
 
     if not folder_path.exists():
-        logging.info("limpeza ignorada. pasta não encontrada")
+        print(f"limpeza ignorada: pasta não encontrada - {folder_path}")
         return removed_files_count
 
     for file_path in folder_path.rglob("*"):
@@ -43,17 +49,32 @@ def cleanup_storage_folder(folder_path: Path, expiration_limit: datetime) -> int
 
     return removed_files_count
 
-def get_cleanup_storage_folders() -> list[Path]:
+
+def get_compare_storage_folders() -> list[Path]:
     return [
         Config.COMPARE_RECEIVED_FOLDER,
         Config.COMPARE_PROCESSED_FOLDER,
         Config.COMPARE_TEMP_FOLDER,
+    ]
+
+
+def get_extract_text_storage_folders() -> list[Path]:
+    return [
         Config.EXTRACT_TEXT_RECEIVED_FOLDER,
         Config.EXTRACT_TEXT_PROCESSED_FOLDER,
         Config.EXTRACT_TEXT_TEMP_FOLDER,
     ]
 
-def cleanup_compare_files() -> int:
+
+def get_split_pdf_storage_folders() -> list[Path]:
+    return [
+        Config.SPLIT_PDF_RECEIVED_FOLDER,
+        Config.SPLIT_PDF_PROCESSED_FOLDER,
+        Config.SPLIT_PDF_TEMP_FOLDER,
+    ]
+
+
+def cleanup_folders(storage_folders: list[Path]) -> int:
     expiration_limit = get_file_expiration_limit(
         Config.TIMEZONE_NAME,
         Config.CLEANUP_FILE_MAX_AGE_HOURS,
@@ -61,9 +82,38 @@ def cleanup_compare_files() -> int:
 
     removed_files_count = 0
 
-    for folder_path in get_cleanup_storage_folders():
+    for folder_path in storage_folders:
         removed_files_count += cleanup_storage_folder(folder_path, expiration_limit)
 
-    logging.info(f"limpeza concluída. arquivos removidos: {removed_files_count}")
+    return removed_files_count
 
+
+def cleanup_compare_files() -> int:
+    removed_files_count = cleanup_folders(get_compare_storage_folders())
+
+    print(f"limpeza compare concluída: {removed_files_count} arquivo(s) removido(s)")
+    return removed_files_count
+
+
+def cleanup_extract_text_files() -> int:
+    removed_files_count = cleanup_folders(get_extract_text_storage_folders())
+
+    print(f"limpeza extract-text concluída: {removed_files_count} arquivo(s) removido(s)")
+    return removed_files_count
+
+
+def cleanup_split_pdf_files() -> int:
+    removed_files_count = cleanup_folders(get_split_pdf_storage_folders())
+
+    print(f"limpeza split-pdf concluída: {removed_files_count} arquivo(s) removido(s)")
+    return removed_files_count
+
+
+def cleanup_all_feature_files() -> int:
+    removed_files_count = 0
+    removed_files_count += cleanup_compare_files()
+    removed_files_count += cleanup_extract_text_files()
+    removed_files_count += cleanup_split_pdf_files()
+
+    print(f"limpeza geral concluída: {removed_files_count} arquivo(s) removido(s)")
     return removed_files_count

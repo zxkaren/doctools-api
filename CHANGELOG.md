@@ -4,21 +4,39 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
 O formato segue uma estrutura simples baseada em versionamento semântico.
 
+## [1.5.0] - 2026-07-06
+
+### Adicionado
+- Funcionalidade Split PDF por meio do novo endpoint `/split/pdf/`.
+- Suporte para separar um PDF em páginas individuais usando `one_by_one`.
+- Suporte para separar um PDF em pacotes personalizados de páginas usando `pack`.
+- Suporte para intervalos de páginas nos packs, como `1-3` e `4-10`.
+- Suporte para campos `pack` e `pages` repetidos em `form-data`, facilitando integrações com frontend e Postman.
+- Suporte no Swagger para informar múltiplos packs usando packs separados por vírgula e grupos de páginas separados por ponto e vírgula.
+- Geração de URLs de download para cada PDF criado.
+- Pastas isoladas para armazenamento dos arquivos da funcionalidade Split PDF em `storage/split_pdf`.
+- Testes automatizados para split página por página, split por pack, intervalos de páginas, campos repetidos, formato compatível com Swagger, download e erros de validação.
+
+### Alterado
+- Configuração do Swagger atualizada para incluir a nova funcionalidade Split PDF.
+- Rotina de limpeza atualizada para contemplar as pastas de `storage/split_pdf`.
+- Versão do projeto atualizada para `1.5.0`.
+
 ## [1.4.0] - 2026-07-05
 
-### Added
-- Added text extraction feature through the new `/extract-text/` endpoint.
-- Added support for extracting clean text from PDF, DOCX and PPTX files.
-- Added support for individual output generation following the rule: one input file generates one output file.
-- Added output formats for extracted text: DOCX, TXT and JSON.
-- Added text cleaning rules to remove URLs, emails, emojis, page numbers and image captions.
-- Added recursive extraction for nested DOCX tables and grouped PPTX shapes.
-- Added automated tests for text extraction, default output format, invalid extensions, invalid output formats and text cleaning rules.
+### Adicionado
+- Funcionalidade de extração de texto por meio do novo endpoint `/extract-text/`.
+- Suporte para extração de texto limpo de arquivos PDF, DOCX e PPTX.
+- Suporte para geração individual de saída seguindo a regra: um arquivo de entrada gera um arquivo de saída.
+- Suporte aos formatos de saída para texto extraído: DOCX, TXT e JSON.
+- Regras de limpeza textual para remover URLs, e-mails, emojis, números de página e legendas de imagens.
+- Extração recursiva para tabelas aninhadas em DOCX e formas agrupadas em PPTX.
+- Testes automatizados para extração de texto, formato padrão de saída, extensões inválidas, formatos de saída inválidos e regras de limpeza textual.
 
-### Changed
-- Updated Swagger configuration to include the new text extraction feature.
-- Updated Swagger version loading to read the project version from the `VERSION` file.
-- Updated cleanup routine to include `storage/extract_text` folders.
+### Alterado
+- Configuração do Swagger atualizada para incluir a nova funcionalidade de extração de texto.
+- Carregamento da versão no Swagger atualizado para ler a versão do projeto a partir do arquivo `VERSION`.
+- Rotina de limpeza atualizada para contemplar as pastas de `storage/extract_text`.
 
 ## [1.3.0] - 2026-07-05
 

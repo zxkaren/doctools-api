@@ -37,6 +37,23 @@ Formatos de saída:
 - TXT
 - JSON
 
+### Split PDF
+
+Funcionalidade responsável por separar um arquivo PDF em páginas individuais ou em pacotes personalizados de páginas.
+
+Pode ser usada, por exemplo, para dividir atas, contratos, relatórios, documentos digitalizados ou materiais extensos em arquivos menores, mantendo a ordem de páginas definida pelo usuário.
+
+A funcionalidade aceita somente 1 PDF por requisição e pode gerar múltiplos PDFs como saída.
+
+Extensão suportada:
+
+- PDF
+
+Tipos de split disponíveis:
+
+- `one_by_one`: gera 1 PDF para cada página do documento.
+- `pack`: gera PDFs personalizados com páginas ou intervalos definidos pelo usuário.
+
 ## Tecnologias utilizadas
 
 * Python
@@ -82,6 +99,19 @@ doctools-api/
 │   │   │       └── slides_processor.py
 │   │   │
 │   │   └── extract_text/
+│   │   │   ├── __init__.py
+│   │   │   ├── routes.py
+│   │   │   ├── service.py
+│   │   │   ├── validators.py
+│   │   │   │
+│   │   │   └── processors/
+│   │   │       ├── __init__.py
+│   │   │       ├── pdf_processor.py
+│   │   │       ├── word_processor.py
+│   │   │       ├── slides_processor.py
+│   │   │       └── text_cleaner.py
+│   │   │
+│   │   └── split_pdf/
 │   │       ├── __init__.py
 │   │       ├── routes.py
 │   │       ├── service.py
@@ -89,11 +119,7 @@ doctools-api/
 │   │       │
 │   │       └── processors/
 │   │           ├── __init__.py
-│   │           ├── pdf_processor.py
-│   │           ├── word_processor.py
-│   │           ├── slides_processor.py
-│   │           └── text_cleaner.py
-│   │
+│   │           └── pdf_processor.py
 │   ├── jobs/
 │   │   ├── __init__.py
 │   │   └── cleanup_files.py
@@ -114,18 +140,26 @@ doctools-api/
 │   │       └── .gitkeep
 │   │
 │   └── extract_text/
+│   │   ├── received/
+│   │   │   └── .gitkeep
+│   │   ├── processed/
+│   │   │   └── .gitkeep
+│   │   └── temp/
+│   │       └── .gitkeep
+│   │
+│   └── split_pdf/
 │       ├── received/
 │       │   └── .gitkeep
 │       ├── processed/
 │       │   └── .gitkeep
 │       └── temp/
 │           └── .gitkeep
-│
 ├── tests/
 │   ├── __init__.py
 │   ├── test_cleanup_files.py
 │   ├── test_compare.py
-│   └── test_extract_text.py
+│   ├── test_extract_text.py
+│   └── test_split_pdf.py│
 │
 ├── .env.example
 ├── .gitignore
@@ -134,7 +168,7 @@ doctools-api/
 ├── requirements.txt
 ├── run.py
 └── VERSION
-
+````
 ## Como instalar
 
 Clone o projeto:
@@ -339,6 +373,64 @@ GET /extract-text/download/{processed_filename}
 
 Essa rota é usada para baixar arquivos processados quando a resposta da extração retorna um `download_url`.
 
+---
+
+## Split PDF
+
+Funcionalidade responsável por separar um único arquivo PDF em páginas individuais ou em pacotes personalizados.
+
+### Separar PDF
+
+```text
+POST /split/pdf/
+```
+
+### Campos obrigatórios:
+```
+file
+split_type
+```
+### Valores permitidos para split_type:
+```
+one_by_one
+pack
+```
+Quando split_type for one_by_one, os campos pack e pages não precisam ser informados.
+
+Quando split_type for pack, os campos abaixo passam a ser obrigatórios:
+```
+pack
+pages
+```
+Exemplo para um único pack:
+```
+pack: 1
+pages: 1-3
+```
+Exemplo para múltiplos packs em integrações via Postman ou frontend:
+```
+pack: 1
+pages: 1-3
+
+pack: 2
+pages: 4-10
+
+pack: 3
+pages: 11,12,15-18
+```
+Exemplo compatível com Swagger:
+```
+pack: 1,2,3
+pages: 1-3;4-10;11,12,15-18
+```
+### Regra de processamento:
+
+* 1 PDF enviado = 1 ou mais PDFs gerados
+* Baixar arquivo processado pelo Split PDF
+* GET /split/pdf/download/{processed_filename}
+
+Essa rota é usada para baixar os arquivos PDF gerados quando a resposta do split retorna os download_url.
+
 ## Regras da comparação PDF
 
 A comparação de PDF:
@@ -440,6 +532,23 @@ files
 
 Cada item de `files` representa o resultado individual de um arquivo enviado.
 
+## Regras do Split PDF
+
+O Split PDF:
+
+* aceita somente arquivos no formato `.pdf`;
+* aceita somente 1 arquivo PDF por requisição;
+* permite separar o PDF página por página usando `one_by_one`;
+* permite separar o PDF em pacotes personalizados usando `pack`;
+* permite informar páginas soltas, como `1,2,5`;
+* permite informar intervalos de páginas, como `1-3` e `4-10`;
+* permite combinar páginas soltas e intervalos, como `1,2,5-8`;
+* impede páginas repetidas dentro do mesmo pack;
+* impede que a mesma página seja informada em mais de um pack;
+* valida se as páginas informadas existem no PDF original;
+* gera um arquivo PDF para cada página ou pack processado;
+* retorna uma URL de download para cada PDF gerado.
+
 ## Segurança
 
 O arquivo `.env` não deve ser publicado no GitHub.
@@ -456,6 +565,14 @@ A API possui uma rotina agendada para limpar arquivos antigos das pastas:
 storage/compare/received/
 storage/compare/processed/
 storage/compare/temp/
+
+storage/extract_text/received/
+storage/extract_text/processed/
+storage/extract_text/temp/
+
+storage/split_pdf/received/
+storage/split_pdf/processed/
+storage/split_pdf/temp/
 ```
 
 A rotina preserva os arquivos `.gitkeep`.
