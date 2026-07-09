@@ -1,8 +1,8 @@
 # DocTools API
 
-A DocTools API é uma API desenvolvida em Python com Flask e Swagger para centralizar ferramentas de processamento, análise e tratamento de documentos.
+A **DocTools API** é uma API desenvolvida em Python com Flask e Swagger para centralizar ferramentas de processamento, análise e tratamento de documentos.
 
-O projeto foi estruturado de forma modular para permitir a evolução contínua de novas funcionalidades documentais, mantendo separação clara entre recursos, rotas, processamentos, validações, testes e documentação.
+O projeto foi estruturado de forma modular para permitir evolução contínua, mantendo separação clara entre rotas, serviços, processadores, validações, testes e documentação.
 
 ## Funcionalidades
 
@@ -54,121 +54,31 @@ Tipos de split disponíveis:
 - `one_by_one`: gera 1 PDF para cada página do documento.
 - `pack`: gera PDFs personalizados com páginas ou intervalos definidos pelo usuário.
 
+### Merge PDF
+
+Funcionalidade responsável por unir múltiplos arquivos PDF em um único documento final.
+
+Pode ser usada, por exemplo, para consolidar contratos, anexos, comprovantes, relatórios, atas ou documentos digitalizados que precisam ser entregues como um único arquivo.
+
+A funcionalidade permite que os arquivos sejam unidos na ordem de upload ou em uma ordem personalizada enviada pelo usuário.
+
+Extensão suportada:
+
+- PDF
+
 ## Tecnologias utilizadas
 
-* Python
-* Flask
-* Flasgger
-* PyMuPDF
-* python-docx
-* openpyxl
-* APScheduler
-* python-decouple
-* pytest
+- Python
+- Flask
+- Flasgger
+- PyMuPDF
+- python-docx
+- openpyxl
+- python-pptx
+- APScheduler
+- python-decouple
+- pytest
 
-## Estrutura do projeto
-
-```text
-doctools-api/
-│
-├── app/
-│   ├── __init__.py
-│   ├── config.py
-│   │
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── exceptions.py
-│   │   ├── responses.py
-│   │   ├── file_manager.py
-│   │   └── validators.py
-│   │
-│   ├── features/
-│   │   ├── __init__.py
-│   │   │
-│   │   ├── compare/
-│   │   │   ├── __init__.py
-│   │   │   ├── routes.py
-│   │   │   ├── service.py
-│   │   │   ├── validators.py
-│   │   │   │
-│   │   │   └── processors/
-│   │   │       ├── __init__.py
-│   │   │       ├── pdf_processor.py
-│   │   │       ├── word_processor.py
-│   │   │       ├── excel_processor.py
-│   │   │       └── slides_processor.py
-│   │   │
-│   │   └── extract_text/
-│   │   │   ├── __init__.py
-│   │   │   ├── routes.py
-│   │   │   ├── service.py
-│   │   │   ├── validators.py
-│   │   │   │
-│   │   │   └── processors/
-│   │   │       ├── __init__.py
-│   │   │       ├── pdf_processor.py
-│   │   │       ├── word_processor.py
-│   │   │       ├── slides_processor.py
-│   │   │       └── text_cleaner.py
-│   │   │
-│   │   └── split_pdf/
-│   │       ├── __init__.py
-│   │       ├── routes.py
-│   │       ├── service.py
-│   │       ├── validators.py
-│   │       │
-│   │       └── processors/
-│   │           ├── __init__.py
-│   │           └── pdf_processor.py
-│   ├── jobs/
-│   │   ├── __init__.py
-│   │   └── cleanup_files.py
-│   │
-│   └── utils/
-│       ├── __init__.py
-│       ├── dates.py
-│       ├── filenames.py
-│       └── logs.py
-│
-├── storage/
-│   ├── compare/
-│   │   ├── received/
-│   │   │   └── .gitkeep
-│   │   ├── processed/
-│   │   │   └── .gitkeep
-│   │   └── temp/
-│   │       └── .gitkeep
-│   │
-│   └── extract_text/
-│   │   ├── received/
-│   │   │   └── .gitkeep
-│   │   ├── processed/
-│   │   │   └── .gitkeep
-│   │   └── temp/
-│   │       └── .gitkeep
-│   │
-│   └── split_pdf/
-│       ├── received/
-│       │   └── .gitkeep
-│       ├── processed/
-│       │   └── .gitkeep
-│       └── temp/
-│           └── .gitkeep
-├── tests/
-│   ├── __init__.py
-│   ├── test_cleanup_files.py
-│   ├── test_compare.py
-│   ├── test_extract_text.py
-│   └── test_split_pdf.py│
-│
-├── .env.example
-├── .gitignore
-├── CHANGELOG.md
-├── README.md
-├── requirements.txt
-├── run.py
-└── VERSION
-````
 ## Como instalar
 
 Clone o projeto:
@@ -178,21 +88,17 @@ git clone https://github.com/zxkaren/doctools-api.git
 cd doctools-api
 ```
 
-Crie o ambiente virtual:
+Crie e ative o ambiente virtual:
 
 ```bash
 python -m venv .venv
-```
-
-Ative o ambiente virtual:
-
-```bash
 source .venv/bin/activate
 ```
 
 No Windows PowerShell:
 
 ```powershell
+python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
@@ -213,8 +119,6 @@ No Windows PowerShell:
 ```powershell
 Copy-Item .env.example .env
 ```
-
-Ajuste os valores do `.env` conforme seu ambiente local.
 
 ## Como executar
 
@@ -238,32 +142,21 @@ http://127.0.0.1:5000/docs/
 
 ## Rotas disponíveis
 
-A DocTools API organiza suas rotas por funcionalidade. Cada grupo de rota pertence a uma feature específica do projeto.
+### Compare
 
----
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/compare/` | Compara documentos identificando a extensão automaticamente. |
+| POST | `/compare/{extension}` | Compara documentos usando a extensão informada na rota. |
+| GET | `/compare/download/{processed_filename}` | Baixa o arquivo processado pelo Compare. |
 
-## Compare
+Campos principais:
 
-Funcionalidade responsável por comparar documentos de uma mesma extensão e identificar diferenças entre eles.
-
-### Comparar documentos identificando a extensão automaticamente
-
-```text
-POST /compare/
-```
-
-Campos obrigatórios:
-
-```text
-original
-modified
-```
-
-Campo opcional:
-
-```text
-response_mode
-```
+| Campo | Obrigatório | Descrição |
+|---|---:|---|
+| `original` | Sim | Arquivo original. |
+| `modified` | Sim | Arquivo modificado. |
+| `response_mode` | Não | Define o formato de resposta. |
 
 Valores permitidos para `response_mode`:
 
@@ -273,12 +166,6 @@ json
 json_file
 ```
 
-### Comparar documentos escolhendo a extensão na rota
-
-```text
-POST /compare/{extension}
-```
-
 Extensões aceitas:
 
 ```text
@@ -288,48 +175,19 @@ xlsx
 pptx
 ```
 
-Extensões implementadas neste momento:
+### Extração de Texto
 
-```text
-pdf
-docx
-xlsx
-pptx
-```
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/extract-text/` | Extrai texto limpo de um ou mais documentos. |
+| GET | `/extract-text/download/{processed_filename}` | Baixa o arquivo processado pela Extração de Texto. |
 
-### Baixar arquivo processado pelo Compare
+Campos principais:
 
-```text
-GET /compare/download/{processed_filename}
-```
-
-Essa rota é usada para baixar arquivos processados quando a resposta da comparação retorna um `download_url`.
-
----
-
-## Extração de Texto
-
-Funcionalidade responsável por extrair apenas o conteúdo textual principal de documentos, removendo elementos que não fazem parte da leitura útil.
-
-### Extrair texto de documentos
-
-```text
-POST /extract-text/
-```
-
-Campo obrigatório:
-
-```text
-files
-```
-
-O campo `files` aceita um ou mais arquivos na mesma requisição.
-
-Campo opcional:
-
-```text
-output_format
-```
+| Campo | Obrigatório | Descrição |
+|---|---:|---|
+| `files` | Sim | Um ou mais arquivos para extração de texto. |
+| `output_format` | Não | Formato de saída. Valor padrão: `docx`. |
 
 Valores permitidos para `output_format`:
 
@@ -339,76 +197,38 @@ txt
 json
 ```
 
-Valor padrão:
-
-```text
-docx
-```
-
-Extensões aceitas:
-
-```text
-pdf
-docx
-pptx
-```
-
 Regra de processamento:
 
 ```text
 1 arquivo enviado = 1 arquivo de saída gerado
 ```
 
-Exemplo:
+### Split PDF
 
-```text
-3 arquivos enviados = 3 arquivos processados individualmente
-```
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/split/pdf/` | Divide um PDF por páginas individuais ou pacotes personalizados. |
+| GET | `/split/pdf/download/{processed_filename}` | Baixa um PDF gerado pelo Split PDF. |
 
-### Baixar arquivo processado pela Extração de Texto
+Campos principais:
 
-```text
-GET /extract-text/download/{processed_filename}
-```
+| Campo | Obrigatório | Descrição |
+|---|---:|---|
+| `file` | Sim | PDF que será dividido. |
+| `split_type` | Sim | Tipo de split: `one_by_one` ou `pack`. |
+| `pack` | Condicional | Obrigatório quando `split_type=pack`. |
+| `pages` | Condicional | Obrigatório quando `split_type=pack`. |
 
-Essa rota é usada para baixar arquivos processados quando a resposta da extração retorna um `download_url`.
-
----
-
-## Split PDF
-
-Funcionalidade responsável por separar um único arquivo PDF em páginas individuais ou em pacotes personalizados.
-
-### Separar PDF
-
-```text
-POST /split/pdf/
-```
-
-### Campos obrigatórios:
-```
-file
-split_type
-```
-### Valores permitidos para split_type:
-```
-one_by_one
-pack
-```
-Quando split_type for one_by_one, os campos pack e pages não precisam ser informados.
-
-Quando split_type for pack, os campos abaixo passam a ser obrigatórios:
-```
-pack
-pages
-```
 Exemplo para um único pack:
-```
+
+```text
 pack: 1
 pages: 1-3
 ```
-Exemplo para múltiplos packs em integrações via Postman ou frontend:
-```
+
+Exemplo para múltiplos packs:
+
+```text
 pack: 1
 pages: 1-3
 
@@ -418,136 +238,142 @@ pages: 4-10
 pack: 3
 pages: 11,12,15-18
 ```
+
 Exemplo compatível com Swagger:
-```
+
+```text
 pack: 1,2,3
 pages: 1-3;4-10;11,12,15-18
 ```
-### Regra de processamento:
 
-* 1 PDF enviado = 1 ou mais PDFs gerados
-* Baixar arquivo processado pelo Split PDF
-* GET /split/pdf/download/{processed_filename}
+### Merge PDF
 
-Essa rota é usada para baixar os arquivos PDF gerados quando a resposta do split retorna os download_url.
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/merge/pdf/` | Une múltiplos arquivos PDF em um único documento. |
+| GET | `/merge/pdf/download/{processed_filename}` | Baixa o PDF unificado. |
 
-## Regras da comparação PDF
+Campos principais:
 
-A comparação de PDF:
+| Campo | Obrigatório | Descrição |
+|---|---:|---|
+| `file` | Sim | Arquivos PDF que serão unidos. Envie o campo `file` múltiplas vezes. |
+| `order` | Não | Ordem personalizada dos arquivos. Aceita CSV ou campos repetidos no `form-data`. |
 
-* usa o arquivo modificado como base;
-* destaca em azul palavras adicionadas;
-* sublinha em vermelho pontos com exclusões;
-* adiciona comentário lateral com o texto excluído;
-* cria uma página final com a tabela de resumo.
+Exemplo usando ordem de upload:
 
-## Regras da comparação Word
+```text
+file: contrato.pdf
+file: anexo.pdf
+file: comprovante.pdf
+```
 
-A comparação de Word:
+Exemplo usando ordem personalizada:
 
-* aceita arquivos no formato `.docx`;
-* usa o arquivo modificado como base;
-* preserva o máximo possível da formatação do arquivo modificado;
-* destaca em azul e sublinhado conteúdos adicionados;
-* destaca em vermelho e tachado conteúdos removidos;
-* cria uma página final com a tabela de resumo.
+```text
+file: contrato.pdf
+file: anexo.pdf
+file: comprovante.pdf
+order: 3,1,2
+```
 
-## Regras da comparação Excel
+Nesse caso, o PDF final será gerado na seguinte ordem:
 
-A comparação de Excel:
+```text
+1. comprovante.pdf
+2. contrato.pdf
+3. anexo.pdf
+```
 
-* aceita arquivos no formato `.xlsx`;
-* usa o arquivo modificado como base;
-* preserva a formatação do arquivo modificado;
-* destaca células adicionadas com fundo azul claro;
-* destaca células removidas com fundo vermelho claro;
-* adiciona comentários nas células alteradas com os prefixos `add:` e `delete:`;
-* cria uma aba `summary_table` com a tabela de resumo.
+Observação: para upload de múltiplos arquivos no mesmo campo `file`, recomenda-se testar via Postman, frontend ou integração própria. O Swagger/Flasgger pode ter limitações visuais para esse tipo de envio.
 
-## Regras da comparação PowerPoint
+## Regras de processamento
 
-A comparação de PowerPoint:
+### Compare PDF
 
-* aceita arquivos no formato `.pptx`;
-* usa o arquivo modificado como base;
-* preserva visualmente os slides existentes;
-* não altera textos, imagens, fontes, caixas, posições ou layout dos slides originais/modificados;
-* compara os slides por similaridade de conteúdo, não apenas pela posição;
-* registra as alterações identificadas no campo de anotações do respectivo slide;
-* registra alterações textuais no formato `add: conteúdo incluído` e `delete: conteúdo removido`;
-* registra imagens adicionadas como `add: imagem adicionada`;
-* registra imagens removidas como `delete: imagem removida`;
-* registra slides adicionados nas anotações do próprio slide adicionado;
-* registra slides removidos nas anotações do slide final de resumo;
-* contabiliza alterações por evento identificado, não por quantidade de palavras;
-* cria um slide final com a tabela de resumo.
+- usa o arquivo modificado como base;
+- destaca em azul palavras adicionadas;
+- sublinha em vermelho pontos com exclusões;
+- adiciona comentário lateral com o texto excluído;
+- cria uma página final com a tabela de resumo.
+
+### Compare Word
+
+- aceita arquivos `.docx`;
+- usa o arquivo modificado como base;
+- preserva o máximo possível da formatação;
+- destaca conteúdos adicionados e removidos;
+- cria uma página final com a tabela de resumo.
+
+### Compare Excel
+
+- aceita arquivos `.xlsx`;
+- usa o arquivo modificado como base;
+- preserva a formatação;
+- destaca células adicionadas e removidas;
+- adiciona comentários nas células alteradas;
+- cria uma aba `summary_table`.
+
+### Compare PowerPoint
+
+- aceita arquivos `.pptx`;
+- usa o arquivo modificado como base;
+- preserva visualmente os slides existentes;
+- compara slides por similaridade de conteúdo;
+- registra alterações no campo de anotações;
+- cria um slide final com a tabela de resumo.
+
+### Extração de Texto
+
+- aceita arquivos `.pdf`, `.docx` e `.pptx`;
+- processa um ou mais arquivos na mesma requisição;
+- gera uma saída individual para cada arquivo enviado;
+- permite saída em `.docx`, `.txt` e `.json`;
+- ignora imagens, ícones, gráficos, URLs, e-mails, emojis, números de página e legendas;
+- retorna o status individual de cada arquivo processado.
+
+### Split PDF
+
+- aceita somente arquivos `.pdf`;
+- aceita somente 1 PDF por requisição;
+- permite separar página por página com `one_by_one`;
+- permite gerar pacotes personalizados com `pack`;
+- aceita páginas soltas e intervalos;
+- valida páginas inexistentes, repetidas ou duplicadas entre packs;
+- retorna uma URL de download para cada PDF gerado.
+
+### Merge PDF
+
+- aceita somente arquivos `.pdf`;
+- exige no mínimo 2 PDFs por requisição;
+- une os arquivos na ordem de upload quando `order` não é informado;
+- une os arquivos na ordem personalizada quando `order` é informado;
+- valida ordem incompleta, posições inexistentes e posições repetidas;
+- gera um único PDF final;
+- retorna uma URL para download do arquivo unificado.
 
 ## Tabela de resumo
 
-A tabela de resumo contém:
+As funcionalidades de comparação retornam uma tabela de resumo contendo:
 
 ```text
 add
 delete
 total_changes
 ```
-## Regras da Extração de Texto
 
-A extração de texto:
+## Limpeza de arquivos
 
-* aceita arquivos nos formatos `.pdf`, `.docx` e `.pptx`;
-* processa um ou mais arquivos na mesma requisição;
-* respeita a regra `1 arquivo enviado = 1 arquivo de saída gerado`;
-* permite saída nos formatos `.docx`, `.txt` e `.json`;
-* usa `.docx` como formato padrão quando `output_format` não é informado;
-* extrai apenas o conteúdo textual principal do documento;
-* ignora imagens, ícones, gráficos e objetos visuais;
-* ignora URLs, e-mails, emojis, números de página e legendas de imagens;
-* ignora cabeçalhos, rodapés e notas quando não fazem parte do corpo principal extraído;
-* preserva acentuação, pontuação e quebras úteis para leitura;
-* mantém o processamento dos demais arquivos quando algum arquivo falha;
-* retorna o status individual de cada arquivo processado.
-
-## Formatos de saída
-
-A extração de texto pode gerar arquivos nos formatos:
+A API possui rotina agendada para limpar arquivos antigos das pastas de storage das funcionalidades:
 
 ```text
-docx
-txt
-json
+compare
+extract_text
+split_pdf
+merge_pdf
 ```
 
-## Estrutura da resposta
-
-A resposta da extração informa:
-
-```text
-output_format
-total_files
-processed_files
-failed_files
-files
-```
-
-Cada item de `files` representa o resultado individual de um arquivo enviado.
-
-## Regras do Split PDF
-
-O Split PDF:
-
-* aceita somente arquivos no formato `.pdf`;
-* aceita somente 1 arquivo PDF por requisição;
-* permite separar o PDF página por página usando `one_by_one`;
-* permite separar o PDF em pacotes personalizados usando `pack`;
-* permite informar páginas soltas, como `1,2,5`;
-* permite informar intervalos de páginas, como `1-3` e `4-10`;
-* permite combinar páginas soltas e intervalos, como `1,2,5-8`;
-* impede páginas repetidas dentro do mesmo pack;
-* impede que a mesma página seja informada em mais de um pack;
-* valida se as páginas informadas existem no PDF original;
-* gera um arquivo PDF para cada página ou pack processado;
-* retorna uma URL de download para cada PDF gerado.
+A rotina preserva os arquivos `.gitkeep`.
 
 ## Segurança
 
@@ -557,22 +383,22 @@ Arquivos enviados e processados também não devem ser versionados.
 
 As pastas de storage são mantidas no repositório apenas por meio de arquivos `.gitkeep`.
 
-## Limpeza de arquivos
+## Testes
 
-A API possui uma rotina agendada para limpar arquivos antigos das pastas:
+Execute a suíte de testes com:
 
-```text
-storage/compare/received/
-storage/compare/processed/
-storage/compare/temp/
-
-storage/extract_text/received/
-storage/extract_text/processed/
-storage/extract_text/temp/
-
-storage/split_pdf/received/
-storage/split_pdf/processed/
-storage/split_pdf/temp/
+```bash
+pytest -v
 ```
 
-A rotina preserva os arquivos `.gitkeep`.
+Execução validada na versão atual:
+
+```text
+30 passed
+```
+
+## Versão atual
+
+```text
+1.6.0
+```
