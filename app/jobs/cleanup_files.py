@@ -73,6 +73,12 @@ def get_split_pdf_storage_folders() -> list[Path]:
         Config.SPLIT_PDF_TEMP_FOLDER,
     ]
 
+def get_merge_pdf_storage_folders() -> list[Path]:
+    return [
+        Config.MERGE_PDF_RECEIVED_FOLDER,
+        Config.MERGE_PDF_PROCESSED_FOLDER,
+        Config.MERGE_PDF_TEMP_FOLDER,
+    ]
 
 def cleanup_folders(storage_folders: list[Path]) -> int:
     expiration_limit = get_file_expiration_limit(
@@ -108,12 +114,16 @@ def cleanup_split_pdf_files() -> int:
     print(f"limpeza split-pdf concluída: {removed_files_count} arquivo(s) removido(s)")
     return removed_files_count
 
+def cleanup_merge_pdf_files() -> int:
+    removed_files_count = cleanup_folders(get_merge_pdf_storage_folders())
+    print(f"limpeza merge-pdf concluída: {removed_files_count} arquivo(s) removido(s)")
+    return removed_files_count
 
 def cleanup_all_feature_files() -> int:
     removed_files_count = 0
     removed_files_count += cleanup_compare_files()
     removed_files_count += cleanup_extract_text_files()
     removed_files_count += cleanup_split_pdf_files()
-
+    removed_files_count += cleanup_merge_pdf_files()
     print(f"limpeza geral concluída: {removed_files_count} arquivo(s) removido(s)")
     return removed_files_count

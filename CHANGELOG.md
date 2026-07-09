@@ -4,6 +4,31 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
 O formato segue uma estrutura simples baseada em versionamento semântico.
 
+## [1.6.0] - 2026-07-09
+
+### Added
+
+- Implementada funcionalidade de Merge PDF.
+- Adicionado endpoint `POST /merge/pdf/` para unir múltiplos arquivos PDF em um único documento.
+- Adicionada rota `GET /merge/pdf/download/{processed_filename}` para download do PDF unificado.
+- Adicionado suporte à ordenação personalizada dos arquivos via campo `order`.
+- Adicionado suporte a ordenação por CSV, como `3,1,2`.
+- Adicionado suporte a ordenação por campos repetidos no `form-data`.
+- Criado storage isolado para `merge_pdf` com pastas `received`, `processed` e `temp`.
+- Criados testes automatizados para validação do fluxo de merge, download, ordenação e erros de entrada.
+- Incluída limpeza automática dos arquivos da feature `merge_pdf`.
+
+### Changed
+
+- Atualizado limite máximo de requisição para `300 MB` via `MAX_CONTENT_LENGTH=314572800`.
+- Registrado blueprint da feature `merge_pdf` na aplicação Flask.
+- Atualizada configuração `.env.example` com as variáveis da feature `merge_pdf`.
+
+### Validation
+
+- Teste manual realizado via Postman com múltiplos PDFs.
+- Suíte automatizada executada com sucesso: `30 passed`.
+
 ## [1.5.0] - 2026-07-06
 
 ### Adicionado

@@ -1,0 +1,1 @@
+from app.features.merge_pdf.routes import merge_pdf_blueprint
