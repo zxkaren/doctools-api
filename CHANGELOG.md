@@ -4,6 +4,38 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
 O formato segue uma estrutura simples baseada em versionamento semântico.
 
+## [1.7.0] - 2026-07-11
+
+### Added
+
+- Implementada funcionalidade de OCR PDF.
+- Adicionado endpoint `POST /ocr/pdf/` para aplicar OCR em um ou mais arquivos PDF.
+- Adicionada rota `GET /ocr/pdf/download/{processed_filename}` para download dos PDFs processados com OCR.
+- Adicionado suporte ao processamento de múltiplos documentos PDF na mesma requisição.
+- Adicionado suporte aos modos de OCR `apply` e `force`.
+- Adicionado suporte aos idiomas `pt_br`, `pt_pt`, `en_us` e `es_es`, mapeados para os idiomas disponíveis no Tesseract.
+- Adicionado suporte aos perfis de qualidade `standard`, `enhanced`, `aggressive` e `ebook`.
+- Adicionado perfil `ebook` para apostilas, e-books e materiais de estudo com layout visual.
+- Criado storage isolado para `ocr_pdf` com pastas `received`, `processed` e `temp`.
+- Criados testes automatizados para validação de arquivos PDF, modos de OCR, idiomas, perfis de qualidade e montagem dos comandos do OCRmyPDF.
+
+### Changed
+
+- Docker atualizado para incluir suporte a OCR com `ocrmypdf`, `tesseract`, `ghostscript`, `qpdf` e `unpaper`.
+- Incluídos pacotes de idioma do Tesseract para português, inglês e espanhol.
+- Registrado blueprint da feature `ocr_pdf` na aplicação Flask.
+- Atualizada configuração `.env.example` com as variáveis da feature `ocr_pdf`.
+- Atualizado Swagger para documentar a nova funcionalidade OCR PDF.
+- Ajustado perfil `aggressive` para evitar rotação automática indevida e remover opção incompatível `--remove-background`.
+- Adicionado limite `--max-image-mpixels 1000` para suportar PDFs com imagens grandes durante o OCR.
+
+### Validation
+
+- Teste manual realizado via Postman com PDF de apostila contendo imagens, blocos coloridos e texto em layout visual.
+- Validação manual dos perfis `standard`, `enhanced`, `aggressive` e `ebook`.
+- Perfil `ebook` validado como melhor opção para apostilas e materiais de estudo com layout visual.
+- Suíte automatizada executada com sucesso: `45 passed`.
+
 ## [1.6.0] - 2026-07-09
 
 ### Added
