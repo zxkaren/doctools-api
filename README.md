@@ -66,7 +66,19 @@ Extensão suportada:
 
 - PDF
 
-## Tecnologias utilizadas
+### OCR PDF
+
+Funcionalidade responsável por aplicar OCR em arquivos PDF, tornando pesquisáveis documentos que possuem texto em imagem, documentos escaneados ou arquivos sem camada textual confiável.
+
+Pode ser usada, por exemplo, para processar apostilas, e-books acadêmicos, contratos digitalizados, comprovantes, relatórios escaneados, documentos enviados como imagem, PDFs antigos ou materiais que precisam ter o texto extraído posteriormente.
+
+A funcionalidade permite aplicar OCR em um ou múltiplos arquivos PDF na mesma requisição, definir o idioma do reconhecimento e escolher o perfil de qualidade mais adequado para o tipo de documento.
+
+Extensão suportada:
+
+- PDF
+
+# Tecnologias utilizadas
 
 - Python
 - Flask
@@ -78,6 +90,22 @@ Extensão suportada:
 - APScheduler
 - python-decouple
 - pytest
+
+## Dependências de sistema para OCR
+
+A funcionalidade de OCR PDF depende de ferramentas instaladas no ambiente de execução:
+
+- OCRmyPDF
+- Tesseract OCR
+- Ghostscript
+- qpdf
+- unpaper
+
+## Idiomas configurados no Tesseract:
+
+- Português
+- Inglês
+- Espanhol
 
 ## Como instalar
 
@@ -287,6 +315,68 @@ Nesse caso, o PDF final será gerado na seguinte ordem:
 
 Observação: para upload de múltiplos arquivos no mesmo campo `file`, recomenda-se testar via Postman, frontend ou integração própria. O Swagger/Flasgger pode ter limitações visuais para esse tipo de envio.
 
+### OCR PDF
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/ocr/pdf/` | Aplica OCR em um ou mais arquivos PDF. |
+| GET | `/ocr/pdf/download/{processed_filename}` | Baixa o PDF processado com OCR. |
+
+Campos principais:
+
+| Campo | Obrigatório | Descrição |
+|---|---:|---|
+| `file` | Sim | Arquivos PDF que receberão OCR. Envie o campo `file` múltiplas vezes para processar mais de um documento. |
+| `ocr_mode` | Não | Modo de aplicação do OCR. Aceita `apply` ou `force`. Padrão: `apply`. |
+| `ocr_language` | Não | Idioma usado no reconhecimento de texto. Aceita `pt_br`, `pt_pt`, `en_us` ou `es_es`. Padrão: `pt_br`. |
+| `ocr_quality` | Não | Perfil de qualidade do OCR. Aceita `standard`, `enhanced`, `aggressive` ou `ebook`. Padrão: `standard`. |
+
+Modos de OCR:
+
+| Modo | Descrição |
+|---|---|
+| `apply` | Aplica OCR apenas onde for necessário, preservando páginas que já possuem texto. |
+| `force` | Força OCR em todo o PDF, indicado para documentos escaneados, estáticos ou sem camada textual confiável. |
+
+Perfis de qualidade:
+
+| Perfil | Descrição |
+|---|---|
+| `standard` | Perfil seguro para documentos comuns. |
+| `enhanced` | Aplica melhorias moderadas, como correção de inclinação, rotação automática e limpeza antes do OCR. |
+| `aggressive` | Perfil mais forte para documentos escaneados ou de baixa qualidade, sem rotação automática. |
+| `ebook` | Perfil recomendado para apostilas, e-books, materiais acadêmicos, blocos coloridos e layouts visuais. |
+
+Exemplo usando OCR padrão em um único PDF:
+
+```text
+file: contrato_digitalizado.pdf
+ocr_mode: apply
+ocr_language: pt_br
+ocr_quality: standard
+```
+Exemplo usando OCR em múltiplos PDFs:
+```
+file: apostila_1.pdf
+file: apostila_2.pdf
+file: apostila_3.pdf
+ocr_mode: force
+ocr_language: pt_br
+ocr_quality: ebook
+```
+Nesse caso, cada PDF será processado individualmente e a resposta retornará uma URL de download para cada arquivo gerado:
+```
+1. apostila_1.pdf -> PDF com OCR aplicado
+2. apostila_2.pdf -> PDF com OCR aplicado
+3. apostila_3.pdf -> PDF com OCR aplicado
+```
+Exemplo recomendado para apostilas e materiais de estudo:
+```
+file: fundamentos_do_data_driven.pdf
+ocr_mode: force
+ocr_language: pt_br
+ocr_quality: ebook
+```
 ## Regras de processamento
 
 ### Compare PDF
@@ -323,6 +413,16 @@ Observação: para upload de múltiplos arquivos no mesmo campo `file`, recomend
 - registra alterações no campo de anotações;
 - cria um slide final com a tabela de resumo.
 
+## Tabela de resumo
+
+As funcionalidades de comparação retornam uma tabela de resumo contendo:
+
+```text
+add
+delete
+total_changes
+```
+
 ### Extração de Texto
 
 - aceita arquivos `.pdf`, `.docx` e `.pptx`;
@@ -352,15 +452,23 @@ Observação: para upload de múltiplos arquivos no mesmo campo `file`, recomend
 - gera um único PDF final;
 - retorna uma URL para download do arquivo unificado.
 
-## Tabela de resumo
+### OCR PDF
 
-As funcionalidades de comparação retornam uma tabela de resumo contendo:
-
-```text
-add
-delete
-total_changes
-```
+- aceita somente arquivos `.pdf`;
+- exige no mínimo 1 PDF por requisição;
+- permite processar um ou múltiplos PDFs na mesma requisição;
+- processa cada PDF individualmente, mantendo um arquivo final para cada arquivo enviado;
+- permite definir o modo de OCR por meio do campo `ocr_mode`;
+- aceita `apply` para aplicar OCR somente onde for necessário;
+- aceita `force` para forçar OCR em todo o documento;
+- permite definir o idioma do OCR por meio do campo `ocr_language`;
+- aceita os idiomas `pt_br`, `pt_pt`, `en_us` e `es_es`;
+- permite definir o perfil de qualidade por meio do campo `ocr_quality`;
+- aceita os perfis `standard`, `enhanced`, `aggressive` e `ebook`;
+- recomenda o perfil `ebook` para apostilas, e-books, materiais acadêmicos e PDFs com layout visual;
+- valida arquivos ausentes, extensões inválidas, modos inválidos, idiomas inválidos e perfis de qualidade inválidos;
+- gera PDFs pesquisáveis com OCR aplicado;
+- retorna uma URL de download para cada arquivo processado.
 
 ## Limpeza de arquivos
 
@@ -394,11 +502,11 @@ pytest -v
 Execução validada na versão atual:
 
 ```text
-30 passed
+45 passed
 ```
 
 ## Versão atual
 
 ```text
-1.6.0
+1.7.0
 ```

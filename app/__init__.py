@@ -7,6 +7,7 @@ from app.features.compare import compare_blueprint
 from app.features.extract_text import extract_text_blueprint
 from app.features.split_pdf import split_pdf_blueprint
 from app.features.merge_pdf import merge_pdf_blueprint
+from app.features.ocr_pdf.routes import ocr_pdf_blueprint
 
 
 def load_project_version() -> str:
@@ -52,6 +53,10 @@ SWAGGER_TEMPLATE = {
             "name": "Merge PDF",
             "description": "Funcionalidade para unir múltiplos arquivos PDF em um único documento",
         },
+      {
+            "name": "OCR PDF",
+            "description": "Funcionalidade para aplicar OCR em arquivos PDF",
+        },
     ],
 }
 
@@ -92,6 +97,7 @@ def create_app() -> Flask:
     flask_app.register_blueprint(extract_text_blueprint, url_prefix="/extract-text")
     flask_app.register_blueprint(split_pdf_blueprint, url_prefix="/split/pdf")
     flask_app.register_blueprint(merge_pdf_blueprint, url_prefix="/merge/pdf")
+    flask_app.register_blueprint(ocr_pdf_blueprint, url_prefix="/ocr/pdf")
     register_error_handlers(flask_app)
 
     return flask_app
