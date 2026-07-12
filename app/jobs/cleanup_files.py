@@ -22,17 +22,6 @@ def is_expired_file(file_path: Path, expiration_limit: datetime) -> bool:
 
 
 def cleanup_storage_folder(folder_path: Path, expiration_limit: datetime) -> int:
-    """
-    Resumo:
-        Remove arquivos expirados de uma pasta de armazenamento sem apagar .gitkeep.
-
-    Parâmetros:
-        folder_path: pasta que será analisada.
-        expiration_limit: data limite para considerar um arquivo expirado.
-
-    Retorno:
-        Quantidade de arquivos removidos.
-    """
     removed_files_count = 0
 
     if not folder_path.exists():
@@ -80,6 +69,13 @@ def get_merge_pdf_storage_folders() -> list[Path]:
         Config.MERGE_PDF_TEMP_FOLDER,
     ]
 
+def get_ocr_pdf_storage_folders() -> list[Path]:
+    return [
+        Config.OCR_PDF_RECEIVED_FOLDER,
+        Config.OCR_PDF_PROCESSED_FOLDER,
+        Config.OCR_PDF_TEMP_FOLDER,
+    ]
+
 def cleanup_folders(storage_folders: list[Path]) -> int:
     expiration_limit = get_file_expiration_limit(
         Config.TIMEZONE_NAME,
@@ -119,11 +115,21 @@ def cleanup_merge_pdf_files() -> int:
     print(f"limpeza merge-pdf concluída: {removed_files_count} arquivo(s) removido(s)")
     return removed_files_count
 
+def cleanup_ocr_pdf_files() -> int:
+    removed_files_count = cleanup_folders(get_ocr_pdf_storage_folders())
+
+    print(
+        f"limpeza ocr-pdf concluída: "
+        f"{removed_files_count} arquivo(s) removido(s)"
+    )
+    return removed_files_count
+
 def cleanup_all_feature_files() -> int:
     removed_files_count = 0
     removed_files_count += cleanup_compare_files()
     removed_files_count += cleanup_extract_text_files()
     removed_files_count += cleanup_split_pdf_files()
     removed_files_count += cleanup_merge_pdf_files()
+    removed_files_count += cleanup_ocr_pdf_files()
     print(f"limpeza geral concluída: {removed_files_count} arquivo(s) removido(s)")
     return removed_files_count

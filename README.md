@@ -479,6 +479,7 @@ compare
 extract_text
 split_pdf
 merge_pdf
+ocr_pdf
 ```
 
 A rotina preserva os arquivos `.gitkeep`.
