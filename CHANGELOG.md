@@ -4,6 +4,25 @@ Todas as mudanças relevantes deste projeto serão documentadas aqui.
 
 O formato segue uma estrutura simples baseada em versionamento semântico.
 
+## [1.7.1] - 2026-07-12
+
+### Fixed
+
+- Adicionada ao repositório a estrutura de storage da funcionalidade OCR PDF com as pastas `received`, `processed` e `temp`.
+- Incluída a funcionalidade OCR PDF na rotina automática de exclusão de arquivos expirados.
+- Corrigido o scheduler para executar a limpeza geral de todas as funcionalidades, em vez de limpar somente os arquivos da funcionalidade Compare.
+- Corrigida a inicialização da aplicação para garantir a criação das pastas de storage de Compare, Extract Text, Split PDF, Merge PDF e OCR PDF.
+
+### Changed
+
+- Ampliados os testes automatizados da rotina de limpeza para contemplar Compare, Extract Text, Split PDF, Merge PDF e OCR PDF.
+- Adicionado teste da função centralizadora `cleanup_all_feature_files`.
+
+### Validation
+
+- Suíte específica da rotina de limpeza executada com sucesso: `6 passed`.
+- Suíte automatizada completa executada com sucesso: `50 passed`.
+
 ## [1.7.0] - 2026-07-11
 
 ### Added

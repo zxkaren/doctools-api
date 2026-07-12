@@ -3,7 +3,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from app import create_app
 from app.config import Config
 from app.core.file_manager import ensure_folder_exists
-from app.jobs.cleanup_files import cleanup_compare_files
+from app.jobs.cleanup_files import cleanup_all_feature_files
 
 
 def create_storage_folders() -> None:
@@ -11,6 +11,18 @@ def create_storage_folders() -> None:
         Config.COMPARE_RECEIVED_FOLDER,
         Config.COMPARE_PROCESSED_FOLDER,
         Config.COMPARE_TEMP_FOLDER,
+        Config.EXTRACT_TEXT_RECEIVED_FOLDER,
+        Config.EXTRACT_TEXT_PROCESSED_FOLDER,
+        Config.EXTRACT_TEXT_TEMP_FOLDER,
+        Config.SPLIT_PDF_RECEIVED_FOLDER,
+        Config.SPLIT_PDF_PROCESSED_FOLDER,
+        Config.SPLIT_PDF_TEMP_FOLDER,
+        Config.MERGE_PDF_RECEIVED_FOLDER,
+        Config.MERGE_PDF_PROCESSED_FOLDER,
+        Config.MERGE_PDF_TEMP_FOLDER,
+        Config.OCR_PDF_RECEIVED_FOLDER,
+        Config.OCR_PDF_PROCESSED_FOLDER,
+        Config.OCR_PDF_TEMP_FOLDER,
     ]
 
     try:
@@ -29,10 +41,10 @@ def start_cleanup_scheduler() -> None:
         scheduler = BackgroundScheduler(timezone=Config.TIMEZONE_NAME)
 
         scheduler.add_job(
-            cleanup_compare_files,
+            cleanup_all_feature_files,
             "interval",
             minutes=Config.CLEANUP_INTERVAL_MINUTES,
-            id="cleanup_compare_files",
+            id="cleanup_all_feature_files",
             replace_existing=True,
         )
 
